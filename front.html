@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>마이클리뷰 - 거리 계산</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #2C6693;
+      color: black;
+      text-align: center;
+    }
+    h1 {
+      font-size: 48px;
+      padding: 20px 0 10px;
+    }
+    .search-container {
+      margin: 20px;
+    }
+    .search-box {
+      padding: 10px;
+      font-size: 16px;
+      width: 60%;
+      border-radius: 6px;
+      border: none;
+    }
+    .search-button {
+      padding: 10px 16px;
+      font-size: 16px;
+      background-color: white;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+    }
+    .coffee-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      padding: 20px;
+    }
+    .coffee-card {
+      background-color: white;
+      border-radius: 10px;
+      padding: 10px;
+    }
+    .coffee-card img {
+      width: 100%;
+      border-radius: 10px;
+    }
+    .coffee-name {
+      font-weight: bold;
+      font-size: 20px;
+      margin-top: 10px;
+    }
+    .coffee-distance {
+      font-size: 16px;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>마이클리뷰</h1>
+
+<div class="search-container">
+  <input type="text" class="search-box" placeholder="커피 이름을 검색해보세요" />
+  <button class="search-button" onclick="getUserLocation()">📍 거리 불러오기</button>
+</div>
+
+<div class="coffee-grid" id="coffee-list"></div>
+
+<script>
+  const cafes = [
+    {
+      name: "커피마이클",
+      lat: 37.5711,
+      lng: 126.9917,
+      image: "coffee_michael.jpg"
+    },
+    {
+      name: "커피미카엘",
+      lat: 37.5604,
+      lng: 126.9956,
+      image: "coffee_mikael.jpg"
+    },
+    {
+      name: "커피슈마엘",
+      lat: 37.5345,
+      lng: 126.9731,
+      image: "coffee_shumael.jpg"
+    },
+    {
+      name: "커피기린",
+      lat: 37.5582,
+      lng: 126.9265,
+      image: "coffee_girin.jpg"
+    }
+  ];
+
+  let userLat = null;
+  let userLng = null;
+
+  // ✅ Koder 호환: 임시 위치(종각역)로 거리 계산
+  function getUserLocation() {
+    userLat = 37.5704; // 종각역 위도
+    userLng = 126.9827; // 종각역 경도
+
+    calculateDistances();
+    renderCafes();
+  }
+
+  function calculateDistances() {
+    for (let cafe of cafes) {
+      const distance = getDistance(userLat, userLng, cafe.lat, cafe.lng);
+      cafe.distance = distance.toFixed(2) + " km";
+    }
+  }
+
+  function getDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // 지구 반지름 (km)
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  function deg2rad(deg) {
+    return deg * (Math.PI / 180);
+  }
+
+  function renderCafes() {
+    const container = document.getElementById("coffee-list");
+    container.innerHTML = "";
+    for (let cafe of cafes) {
+      container.innerHTML += `
+        <div class="coffee-card">
+          <img src="${cafe.image}" alt="${cafe.name}">
+          <div class="coffee-name">${cafe.name}</div>
+          <div class="coffee-distance">${cafe.distance || "거리 미계산"}</div>
+        </div>
+      `;
+    }
+  }
+
+  renderCafes(); // 첫 로딩 시 거리 미표시 상태로 렌더링
+</script>
+
+</body>
+</html>
