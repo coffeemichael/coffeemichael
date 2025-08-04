@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>마이클리뷰 - 거리순</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #2c6591; margin:0; padding:0; color:#000; }
+  header { text-align:center; padding:20px; font-size:36px; font-weight:bold; color:white; }
+  .coffee-list { display:flex; flex-wrap:wrap; justify-content:center; gap:20px; padding:20px; }
+  .coffee-card { background:white; border-radius:12px; width:280px; text-align:center; padding:10px; }
+  .coffee-card img { width:100%; border-radius:8px; }
+  .coffee-card .name { font-size:16px; font-weight:bold; margin:10px 0 5px; }
+  .coffee-card .distance { font-size:14px; }
+</style>
+</head>
+<body>
+
+<header>마이클리뷰</header>
+<div id="coffee-list" class="coffee-list">로딩 중...</div>
+
+<script>
+const API_KEY = "357B35E8-AEBD-33AD-981C-F87C4112052C";
+
+const shops = [
+  { name: "Lowkey", address: "성동구 연무장3길 6", img: "1.png" },
+  { name: "Coffee Graffiti", address: "영등포구 양평로28다길 3", img: "2.png" },
+  { name: "Gimisa", address: "성동구 성수이로26길 47", img: "3.png" },
+  { name: "The Barn", address: "성동구 뚝섬로17길 31-22", img: "4.png" },
+  { name: "Center Coffee", address: "성동구 서울숲2길 28-11", img: "5.png" },
+  { name: "Coffee Montage", address: "강동구 올림픽로48길 23-12", img: "6.png" },
+  { name: "Peer Coffee", address: "성동구 광나루로4가길 24", img: "7.png" },
+  { name: "Gary Gristmill", address: "강남구 압구정2길 15 B1", img: "8.png" },
+  { name: "Tailor Coffee", address: "강남구 강남대로160길 31", img: "9.png" },
+  { name: "Biroso Coffee", address: "마포구 광성로6길 42", img: "10.png" },
+  { name: "Coffee Libere", address: "영등포구 영중로 15 타임스퀘어 112호", img: "11.png" },
+  { name: "TXT Coffee", address: "종로구 창덕궁길 121", img: "12.png" },
+  { name: "Namusairo", address: "종로구 사직로8길 21", img: "13.png" },
+  { name: "Champ Coffee", address: "용산구 녹사평대로26가길 24", img: "14.png" },
+  { name: "Liike Coffee", address: "성북구 보문로34가길 24", img: "15.png" },
+  { name: "Gabaemihon", address: "도봉구 도봉로115길 4", img: "16.png" },
+  { name: "New Wave", address: "양천구 신목로2길 35-1", img: "17.png" },
+  { name: "Bean Brothers", address: "마포구 토정로 35-1", img: "18.png" },
+  { name: "Brobell Coffee", address: "성동구 뚝섬로 413", img: "19.png" },
+  { name: "Wicker Park", address: "송파구 석촌호수로 298 잠실대우레이크월드 103-1호", img: "20.png" },
+  { name: "Frolla", address: "성동구 연무장17길 5", img: "21.png" },
+  { name: "Come To Rest", address: "동대문구 회기로 161-11", img: "22.png" },
+  { name: "Deep Blue Lake", address: "마포구 포은로6길 11", img: "23.png" },
+  { name: "Milo Coffee", address: "마포구 동교동 170-33", img: "24.png" },
+  { name: "Loose Door", address: "마포구 포은로 50", img: "25.png" },
+  { name: "Brewing Ceremony", address: "성동구 연무장5가길 22-1", img: "26.png" },
+  { name: "Monsieurbubu", address: "마포구 망원로 13", img: "27.png" },
+  { name: "Frizt Coffee", address: "종로구 율곡로 83", img: "28.png" },
+  { name: "Travertine", address: "용산구 한강대로7길 18-7", img: "29.png" },
+  { name: "YM Coffee", address: "은평구 진관3로 67", img: "30.png" },
+  { name: "Coffee Lusso", address: "강남구 선릉로158길 16", img: "31.png" },
+  { name: "Guete Leute", address: "강남구 선릉로131길 16", img: "32.png" },
+  { name: "Fromheras Dosan", address: "강남구 언주로168길 29", img: "33.png" },
+  { name: "Bunker", address: "강남구 언주로167길 23", img: "34.png" },
+  { name: "A TO B", address: "성동구 아차산로 135 2층", img: "35.png" },
+  { name: "Raw Coffee Stand", address: "성동구 왕십리로4길 28-2", img: "36.png" },
+  { name: "Cafe Onion", address: "강북구 솔매로50길 55", img: "37.png" },
+  { name: "Camel Coffee", address: "영등포구 여의대로 108 지하1층", img: "38.png" },
+  { name: "Aufglet", address: "성동구 독서당로51길 7", img: "39.png" },
+  { name: "Anthracite", address: "용산구 이태원로 240", img: "40.png" }
+];
+
+function getDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return (R * c).toFixed(2);
+}
+
+async function getCoords(shop) {
+  // 1차: 도로명 API
+  let url = `https://api.vworld.kr/req/address?service=address&request=getcoord&version=2.0&crs=epsg:4326&type=road&address=${encodeURIComponent(shop.address)}&key=${API_KEY}`;
+  try {
+    let res = await fetch(url);
+    let data = await res.json();
+    if (data.response.status === "OK") {
+      shop.lat = parseFloat(data.response.result.point.y);
+      shop.lon = parseFloat(data.response.result.point.x);
+      return;
+    }
+  } catch(e) {}
+
+  // 2차: 지번 API
+  url = `https://apis.vworld.kr/jibun2coord.do?q=${encodeURIComponent(shop.address)}&output=json&epsg=epsg:4326&apiKey=${API_KEY}`;
+  try {
+    let res = await fetch(url);
+    let data = await res.json();
+    if (data.x && data.y) {
+      shop.lat = parseFloat(data.y);
+      shop.lon = parseFloat(data.x);
+    }
+  } catch(e) {}
+}
+
+function renderShops(sortedShops) {
+  const container = document.getElementById("coffee-list");
+  container.innerHTML = "";
+  sortedShops.forEach(shop => {
+    const card = document.createElement("div");
+    card.className = "coffee-card";
+    card.innerHTML = `
+      <img src="${shop.img}" alt="${shop.name}">
+      <div class="name">${shop.name}</div>
+      <div class="distance">${shop.distance ? shop.distance + " km" : "좌표없음"}</div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+async function init() {
+  for (let shop of shops) {
+    await getCoords(shop);
+  }
+  if (!navigator.geolocation) return alert("위치 권한 필요!");
+  navigator.geolocation.getCurrentPosition(pos => {
+    const myLat = pos.coords.latitude;
+    const myLon = pos.coords.longitude;
+    shops.forEach(shop => {
+      if (shop.lat && shop.lon) {
+        shop.distance = getDistance(myLat, myLon, shop.lat, shop.lon);
+      }
+    });
+    shops.sort((a,b) => parseFloat(a.distance) - parseFloat(b.distance));
+    renderShops(shops);
+  });
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
